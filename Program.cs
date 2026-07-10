@@ -8,6 +8,9 @@ using var context = new AppDbContext();
 IProductRepository productRepository = new ProductRepository(context);
 var productService = new ProductService(productRepository);
 
+ICategoryRepository categoryRepository = new CategoryRepository(context);
+var categoryService = new CategoryService(categoryRepository);
+
 Console.WriteLine("=== Product EF Console - Day 2 CRUD Test ===");
 
 var newProduct = new Product
@@ -140,5 +143,18 @@ foreach (var product in productsWithCategory)
     Console.WriteLine($"Id: {product.Id}, Name: {product.Name}, Category: {categoryName}, Price: {product.Price}, Quantity: {product.Quantity}");
 }
 
+Console.WriteLine("\n=== Day 4 Delete Category Validation Test ===");
+
+var categoryDeleteResult = await categoryService.DeleteCategoryAsync(accessoryCategory.Id);
+
+var categoryDeleteMessage = categoryDeleteResult switch
+{
+    CategoryDeleteResult.Success => "Deleted category successfully.",
+    CategoryDeleteResult.NotFound => "Category not found.",
+    CategoryDeleteResult.HasProducts => "Cannot delete category because it still has products.",
+    _ => "Unknown delete result."
+};
+
+Console.WriteLine(categoryDeleteMessage);
 
 Console.WriteLine("\nDone.");
