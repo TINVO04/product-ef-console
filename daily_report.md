@@ -367,3 +367,195 @@ dotnet tool run dotnet-ef database update
 - Review search, pagination, relationship và Include.
 - Dọn code, naming và tài liệu.
 - Demo luồng migration và chạy app.
+
+---
+
+# Daily Report - Week 4 Day 5
+
+## Hôm nay đã làm
+
+- Hoàn thiện CRUD Category trong Repository và Service.
+- Bổ sung Category CRUD test trước khi chuyển sang giao diện tương tác.
+- Review và sửa lỗi EF Core tracking khi cập nhật Product và Category.
+- Ngăn dữ liệu demo bị thêm trùng khi chạy chương trình nhiều lần.
+- Refactor `Program.cs` thành composition root ngắn gọn.
+- Tách menu và xử lý input sang `ConsoleApp.cs`.
+- Hoàn thiện menu Category Management: list, add, update, delete.
+- Hoàn thiện menu Product Management: list, add, update, delete.
+- Tích hợp search, pagination và sorting vào Console App.
+- Thêm validation cho tên, ID, giá, số lượng, page, page size và sort field.
+- Giữ business rule không cho xóa Category nếu còn Product.
+- Cập nhật README đầy đủ nội dung Week 4 và demo flow.
+
+## File/class chính
+
+- `Program.cs`: khởi tạo DbContext, Repository, Service và Console App.
+- `ConsoleApp.cs`: menu tương tác, validation và hiển thị kết quả.
+- `Repositories/ICategoryRepository.cs`: contract CRUD Category.
+- `Repositories/CategoryRepository.cs`: CRUD Category và kiểm tra Product tồn tại.
+- `Services/CategoryService.cs`: CRUD và nghiệp vụ xóa Category.
+- `Services/ProductService.cs`: CRUD Product và cập nhật entity đang được tracking.
+- `README.md`: tài liệu tổng hợp Week 4, test case và hướng dẫn demo.
+
+## Kiến trúc sau refactor
+
+```text
+Người dùng
+    |
+    v
+ConsoleApp
+    |
+    v
+ProductService / CategoryService
+    |
+    v
+ProductRepository / CategoryRepository
+    |
+    v
+AppDbContext / EF Core
+    |
+    v
+PostgreSQL
+```
+
+- `ConsoleApp` nhận input và hiển thị output.
+- Service xử lý nghiệp vụ.
+- Repository truy vấn và lưu dữ liệu.
+- `AppDbContext` kết nối EF Core với PostgreSQL.
+
+## Chức năng đã hoàn thiện
+
+### Category
+
+- List Category.
+- Add Category.
+- Update Category.
+- Delete Category.
+- Không cho tên rỗng hoặc tên trùng.
+- Không cho xóa Category còn Product.
+
+### Product
+
+- List Product kèm CategoryName.
+- Add Product và chọn Category tùy chọn.
+- Update Product và Category.
+- Delete Product.
+- Kiểm tra giá và số lượng không âm.
+- Kiểm tra Category tồn tại trước khi gán.
+
+### Search
+
+- Search Product theo tên.
+- Pagination bằng page và page size.
+- Sort theo ID, tên hoặc giá.
+- Validation input và hiển thị kết quả rỗng.
+
+## Vấn đề đã review và sửa
+
+### 1. EF Core tracking khi update
+
+Vấn đề:
+
+- Service tìm entity hiện tại nhưng truyền một object khác cùng ID vào `Update`.
+- EF Core có thể tracking hai instance cùng khóa.
+
+Cách xử lý:
+
+- Cập nhật thuộc tính trên entity đã được tìm thấy.
+- Truyền chính entity đang được tracking vào Repository.
+- Không thay đổi `CreatedAt` khi update Product.
+
+### 2. Dữ liệu mẫu bị trùng
+
+Vấn đề:
+
+- `Program.cs` cũ tự thêm Product và Category mỗi lần chạy.
+
+Cách xử lý:
+
+- Ngăn dữ liệu seed bị thêm trùng trong bước review.
+- Sau đó loại toàn bộ test/seed tự động khỏi startup.
+- App mới chỉ thay đổi dữ liệu khi người dùng chọn thao tác CRUD.
+
+### 3. Program.cs quá dài
+
+Vấn đề:
+
+- Test Day 2 đến Day 5 nằm trong cùng một file.
+
+Cách xử lý:
+
+- `Program.cs` chỉ còn nhiệm vụ ghép dependency.
+- Menu và input được chuyển sang `ConsoleApp.cs`.
+
+## Test case đã chạy
+
+- Add Category hợp lệ và nhận ID.
+- Update Category thành công.
+- Delete Category không có Product thành công.
+- Delete Category còn Product bị chặn.
+- Add Product với tên, giá, số lượng và Category hợp lệ.
+- List Product hiển thị đúng CategoryName.
+- Search Product theo keyword.
+- Pagination và sorting chạy đúng.
+- Input không hợp lệ được từ chối bằng message rõ ràng.
+
+Ví dụ thêm Product:
+
+```text
+Product name: computer
+Price: 25000
+Quantity: 12
+Category id: 1
+Added product successfully. Id: 44
+```
+
+Luồng lưu:
+
+```text
+ConsoleApp.AddProductAsync
+    -> ProductService.AddProductAsync
+    -> ProductRepository.AddAsync
+    -> AppDbContext.SaveChangesAsync
+    -> PostgreSQL
+```
+
+## Migration và lệnh demo
+
+```powershell
+dotnet tool restore
+dotnet tool run dotnet-ef migrations list
+dotnet tool run dotnet-ef database update
+dotnet build
+dotnet run
+```
+
+Migration trong source:
+
+```text
+20260710032424_InitialCreate
+20260710081440_AddCategoryProductRelationship
+```
+
+## Kết quả cuối ngày
+
+- Product + Category Console App đã hoàn thiện.
+- CRUD Category và Product hoạt động qua menu tương tác.
+- Search, pagination và sorting đã được tích hợp.
+- Relationship và Include hoạt động đúng.
+- Validation và business rule hoạt động đúng.
+- Code được tách theo ConsoleApp, Service và Repository.
+- README đã được cập nhật đầy đủ roadmap Week 4.
+- Project build thành công với 0 warning và 0 error.
+
+## Phần cần nắm để vấn đáp
+
+- Vai trò của `Program.cs`, `ConsoleApp`, Service và Repository.
+- Flow thêm Product từ input tới PostgreSQL.
+- Vì sao `CategoryId` nullable.
+- Vì sao dùng `Include` khi list Product kèm Category.
+- Vì sao dùng `AnyAsync` để chặn xóa Category.
+- `IQueryable` và deferred execution hoạt động thế nào.
+- Công thức pagination bằng `Skip` và `Take`.
+- Vì sao phải cập nhật entity đang được EF Core tracking.
+- Migration dùng để quản lý thay đổi schema như thế nào.
