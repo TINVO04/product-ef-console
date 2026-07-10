@@ -9,4 +9,11 @@ public interface ICategoryRepository
     Task<bool> HasProductsAsync(int categoryId);
 
     Task DeleteAsync(Category category);
+
+    Task<List<Category>> GetAllAsync();
+
+    Task AddAsync(Category category);
+
+    Task UpdateAsync(Category category);
+
 }
