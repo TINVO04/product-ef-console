@@ -66,4 +66,47 @@ foreach (var product in productsAfterDelete)
     Console.WriteLine($"Id: {product.Id}, Name: {product.Name}, Price: {product.Price}, Quantity: {product.Quantity}, CreatedAt: {product.CreatedAt}");
 }
 
+Console.WriteLine("\n=== Day 3 Search / Pagination / Sort Test ===");
+
+var day3Products = new List<Product>
+{
+    new Product { Name = "Keyboard", Price = 250000, Quantity = 10 },
+    new Product { Name = "Mouse", Price = 150000, Quantity = 20 },
+    new Product { Name = "Monitor", Price = 2500000, Quantity = 5 },
+    new Product { Name = "Keycap Set", Price = 350000, Quantity = 8 },
+    new Product { Name = "Laptop Stand", Price = 450000, Quantity = 12 },
+    new Product { Name = "USB Cable", Price = 80000, Quantity = 30 }
+};
+
+foreach (var product in day3Products)
+{
+    await productService.AddProductAsync(product);
+}
+
+var pagedProducts = await productService.GetPagedProductsAsync(
+    search: "key",
+    page: 1,
+    pageSize: 5,
+    sortBy: "price");
+
+Console.WriteLine("\nSearch = key, Page = 1, PageSize = 5, SortBy = price:");
+
+foreach (var product in pagedProducts)
+{
+    Console.WriteLine($"Id: {product.Id}, Name: {product.Name}, Price: {product.Price}, Quantity: {product.Quantity}");
+}
+
+var sortedByNameProducts = await productService.GetPagedProductsAsync(
+    search: null,
+    page: 1,
+    pageSize: 5,
+    sortBy: "name");
+
+Console.WriteLine("\nPage = 1, PageSize = 5, SortBy = name:");
+
+foreach (var product in sortedByNameProducts)
+{
+    Console.WriteLine($"Id: {product.Id}, Name: {product.Name}, Price: {product.Price}, Quantity: {product.Quantity}");
+}
+
 Console.WriteLine("\nDone.");

@@ -52,4 +52,20 @@ public class ProductService
         await _productRepository.DeleteAsync(id);
         return true;
     }
+
+    public async Task<List<Product>> GetPagedProductsAsync(string? search, int page, int pageSize, string? sortBy)
+    {
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1)
+        {
+            pageSize = 5;
+        }
+
+        return await _productRepository.GetPagedProductsAsync(search, page, pageSize, sortBy);
+    }
+
 }
