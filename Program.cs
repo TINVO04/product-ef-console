@@ -154,7 +154,81 @@ var categoryDeleteMessage = categoryDeleteResult switch
     CategoryDeleteResult.HasProducts => "Cannot delete category because it still has products.",
     _ => "Unknown delete result."
 };
-
 Console.WriteLine(categoryDeleteMessage);
+
+Console.WriteLine("\n=== Day 5 Category CRUD Test ===");
+
+// Create
+var day5Category = new Category
+{
+    Name = "Day 5 Temporary Category"
+};
+
+await categoryService.AddCategoryAsync(day5Category);
+
+Console.WriteLine(
+    $"Added category - Id: {day5Category.Id}, " +
+    $"Name: {day5Category.Name}");
+
+// Read all
+var day5Categories = await categoryService.GetAllCategoriesAsync();
+
+Console.WriteLine("\nCategory list:");
+
+foreach (var category in day5Categories)
+{
+    Console.WriteLine(
+        $"Id: {category.Id}, Name: {category.Name}");
+}
+
+// Read by ID
+var day5CategoryDetail =
+    await categoryService.GetCategoryByIdAsync(day5Category.Id);
+
+if (day5CategoryDetail is not null)
+{
+    Console.WriteLine(
+        $"\nFound category by id {day5CategoryDetail.Id}: " +
+        day5CategoryDetail.Name);
+
+    // Update
+    day5CategoryDetail.Name = "Day 5 Updated Category";
+
+    var day5UpdateResult =
+        await categoryService.UpdateCategoryAsync(day5CategoryDetail);
+
+    Console.WriteLine(day5UpdateResult
+        ? "Updated category successfully."
+        : "Category not found for update.");
+}
+else
+{
+    Console.WriteLine("Category not found by id.");
+}
+
+// Delete
+var day5DeleteResult =
+    await categoryService.DeleteCategoryAsync(day5Category.Id);
+
+var day5DeleteMessage = day5DeleteResult switch
+{
+    CategoryDeleteResult.Success =>
+        "Deleted category successfully.",
+    CategoryDeleteResult.NotFound =>
+        "Category not found.",
+    CategoryDeleteResult.HasProducts =>
+        "Cannot delete category because it still has products.",
+    _ => "Unknown delete result."
+};
+
+Console.WriteLine(day5DeleteMessage);
+
+// Verify after delete
+var categoryAfterDelete =
+    await categoryService.GetCategoryByIdAsync(day5Category.Id);
+
+Console.WriteLine(categoryAfterDelete is null
+    ? "Category no longer exists after delete."
+    : "Category still exists after delete.");
 
 Console.WriteLine("\nDone.");
