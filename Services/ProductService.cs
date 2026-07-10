@@ -29,14 +29,20 @@ public class ProductService
 
     public async Task<bool> UpdateProductAsync(Product product)
     {
-        var existingProduct = await _productRepository.GetByIdAsync(product.Id);
+        var existingProduct =
+            await _productRepository.GetByIdAsync(product.Id);
 
         if (existingProduct is null)
         {
             return false;
         }
 
-        await _productRepository.UpdateAsync(product);
+        existingProduct.Name = product.Name;
+        existingProduct.Price = product.Price;
+        existingProduct.Quantity = product.Quantity;
+        existingProduct.CategoryId = product.CategoryId;
+
+        await _productRepository.UpdateAsync(existingProduct);
         return true;
     }
 
