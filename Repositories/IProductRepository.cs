@@ -15,5 +15,6 @@ public interface IProductRepository
     Task DeleteAsync(int id);
 
     Task<List<Product>> GetPagedProductsAsync(string? search, int page, int pageSize, string? sortBy);
-
+    Task<List<Product>> GetProductsWithCategoryAsync();
+    
 }
