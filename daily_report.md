@@ -151,3 +151,111 @@ dotnet run
 - Viết search/filter sản phẩm.
 - Viết pagination.
 - Viết sort theo giá hoặc tên.
+
+---
+
+# Daily Report - Week 4 Day 3
+
+## Hôm nay đã làm
+
+- Thêm method `GetPagedProductsAsync` vào `IProductRepository`.
+- Implement `GetPagedProductsAsync` trong `ProductRepository` bằng LINQ.
+- Thêm method `GetPagedProductsAsync` trong `ProductService` để validate `page` và `pageSize`.
+- Cập nhật `Program.cs` để thêm dữ liệu mẫu và test search, pagination, sort.
+- Cập nhật `README.md` với nội dung Day 3, sơ đồ luồng hoạt động và test case.
+
+## File/class chính
+
+- `Repositories/IProductRepository.cs`: định nghĩa contract cho method search/pagination/sort.
+- `Repositories/ProductRepository.cs`: xử lý query bằng `IQueryable`, `Where`, `OrderBy`, `Skip`, `Take`, `ToListAsync`.
+- `Services/ProductService.cs`: validate input cơ bản trước khi gọi repository.
+- `Program.cs`: chạy test case Day 3 và in kết quả ra console.
+- `README.md`: ghi lại flow, test case và checklist Day 3.
+
+## Kiến thức đã học
+
+- `IQueryable` dùng để build query từng bước trước khi chạy SQL thật.
+- `Where` dùng để lọc dữ liệu theo điều kiện.
+- `OrderBy` dùng để sắp xếp dữ liệu tăng dần.
+- `Skip` dùng để bỏ qua dữ liệu của các trang trước.
+- `Take` dùng để lấy số lượng dữ liệu cần hiển thị trong một trang.
+- `ToListAsync` là thời điểm EF Core execute query xuống database.
+- Search có thể xử lý case-insensitive đơn giản bằng `ToLower()`.
+
+## Test case đã chạy
+
+### Search theo keyword
+
+Input:
+
+```text
+search = key
+page = 1
+pageSize = 5
+sortBy = price
+```
+
+Kết quả:
+
+```text
+Keyboard
+Keycap Set
+```
+
+### Sort theo tên
+
+Input:
+
+```text
+search = null
+page = 1
+pageSize = 5
+sortBy = name
+```
+
+Kết quả:
+
+```text
+Keyboard
+Keycap Set
+Laptop Stand
+Monitor
+Mouse
+```
+
+### Pagination
+
+- Dùng `page = 1` và `pageSize = 5`.
+- Kết quả chỉ hiển thị tối đa 5 sản phẩm trong một lần query.
+
+## Lệnh quan trọng đã dùng
+
+```powershell
+dotnet build
+dotnet run
+```
+
+## Kết quả cuối ngày
+
+- Project build thành công.
+- Chức năng search sản phẩm theo keyword chạy được.
+- Chức năng pagination bằng `page` và `pageSize` chạy được.
+- Chức năng sort theo `price` và `name` chạy được.
+- README đã có sơ đồ flow và test case Day 3.
+
+## Phần cần nắm để vấn đáp
+
+- LINQ là gì và dùng để làm gì trong EF Core.
+- `IQueryable` khác `List` như thế nào.
+- Vì sao nên build query bằng `IQueryable` trước khi gọi `ToListAsync`.
+- `Where`, `OrderBy`, `Skip`, `Take` dùng để làm gì.
+- Công thức phân trang: `(page - 1) * pageSize`.
+- Flow từ `Program.cs` đến Service, Repository, DbContext và PostgreSQL.
+
+## Việc tiếp theo Day 4
+
+- Học relationship Category-Product.
+- Tạo `Category` entity.
+- Thêm `CategoryId` cho `Product`.
+- Tạo migration thêm quan hệ.
+- Query danh sách Product kèm CategoryName bằng `Include`.

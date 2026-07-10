@@ -9,6 +9,7 @@ Project dùng để thực hành:
 - EF Core với PostgreSQL.
 - DbContext, DbSet, Entity và Migration.
 - CRUD database bằng Repository Pattern và Service Layer.
+- LINQ query: search, pagination và sorting.
 - Cấu hình connection string an toàn bằng User Secrets.
 
 ## Công nghệ sử dụng
@@ -195,6 +196,168 @@ Product list after delete:
 Done.
 ```
 
+## Nội dung đã làm Day 3
+
+- Thêm method `GetPagedProductsAsync` vào `IProductRepository`, `ProductRepository` và `ProductService`.
+- Search sản phẩm theo keyword bằng LINQ `Where`.
+- Phân trang sản phẩm bằng `Skip` và `Take`.
+- Sắp xếp sản phẩm theo `price` hoặc `name` bằng `OrderBy`.
+- Dùng `IQueryable` để build query từng bước trước khi gọi `ToListAsync`.
+- Cập nhật `Program.cs` để test search, pagination và sort với database thật.
+
+## Sơ đồ luồng hoạt động Day 3
+
+```text
+Người chạy chương trình
+        |
+        v
+Program.cs
+        |
+        | gọi GetPagedProductsAsync(search, page, pageSize, sortBy)
+        v
+ProductService
+        |
+        | validate page/pageSize
+        | gọi repository
+        v
+IProductRepository
+        |
+        v
+ProductRepository
+        |
+        | tạo IQueryable<Product>
+        | áp dụng Where nếu có search
+        | áp dụng OrderBy theo price/name
+        | áp dụng Skip/Take để phân trang
+        | gọi ToListAsync
+        v
+AppDbContext
+        |
+        v
+PostgreSQL database
+```
+
+Giải thích ngắn:
+
+- `Program.cs` chỉ dùng để chạy thử và in kết quả ra console.
+- `ProductService` kiểm tra input cơ bản như `page` và `pageSize`.
+- `ProductRepository` là nơi viết LINQ query để làm việc với database.
+- `IQueryable` giúp nối nhiều điều kiện query trước khi EF Core chạy SQL thật.
+- `ToListAsync` là thời điểm query được execute xuống PostgreSQL.
+
+## Test case Day 3
+
+Chạy project:
+
+```powershell
+dotnet run
+```
+
+Dữ liệu mẫu được thêm trong `Program.cs`:
+
+```text
+Keyboard      - 250000
+Mouse         - 150000
+Monitor       - 2500000
+Keycap Set    - 350000
+Laptop Stand  - 450000
+USB Cable     - 80000
+```
+
+### Test case 1: Search theo keyword
+
+Input:
+
+```text
+search = key
+page = 1
+pageSize = 5
+sortBy = price
+```
+
+Kết quả mong đợi:
+
+```text
+Keyboard
+Keycap Set
+```
+
+Ý nghĩa:
+
+- Tên sản phẩm có chứa `key` sẽ được lấy ra.
+- Search hiện tại dùng case-insensitive đơn giản bằng `ToLower()`.
+- Kết quả được sort theo giá tăng dần.
+
+### Test case 2: Sort theo tên
+
+Input:
+
+```text
+search = null
+page = 1
+pageSize = 5
+sortBy = name
+```
+
+Kết quả mong đợi:
+
+```text
+Keyboard
+Keycap Set
+Laptop Stand
+Monitor
+Mouse
+```
+
+Ý nghĩa:
+
+- Không lọc keyword.
+- Lấy trang đầu tiên.
+- Mỗi trang tối đa 5 sản phẩm.
+- Sắp xếp theo tên tăng dần.
+
+### Test case 3: Pagination
+
+Input:
+
+```text
+page = 1
+pageSize = 5
+```
+
+Kết quả mong đợi:
+
+```text
+Chỉ hiển thị tối đa 5 sản phẩm trong một lần query.
+```
+
+Công thức phân trang:
+
+```text
+Skip = (page - 1) * pageSize
+Take = pageSize
+```
+
+Ví dụ:
+
+```text
+page = 2
+pageSize = 5
+Skip = (2 - 1) * 5 = 5
+Take = 5
+```
+
+## Checklist Day 3
+
+- [x] Có method `GetPagedProductsAsync` trong repository interface.
+- [x] Có implement search bằng `Where`.
+- [x] Có implement sort bằng `OrderBy`.
+- [x] Có implement pagination bằng `Skip` và `Take`.
+- [x] Có dùng `IQueryable` trước khi gọi `ToListAsync`.
+- [x] `Program.cs` có test search/pagination/sort.
+- [x] `dotnet build` pass.
+- [x] `dotnet run` hiển thị đúng kết quả test.
+
 ## Thuật ngữ đã học
 
 - Entity: class đại diện cho table trong database.
@@ -206,6 +369,13 @@ Done.
 - Repository Pattern: pattern tách logic truy cập database ra khỏi tầng chạy chương trình.
 - Service Layer: tầng xử lý nghiệp vụ, gọi repository thay vì gọi DbContext trực tiếp.
 - Async/Await: cách viết code bất đồng bộ khi làm việc với database.
+- LINQ: cú pháp query dữ liệu trong C#.
+- IQueryable: query chưa chạy ngay, có thể nối thêm filter/sort/pagination.
+- Where: lọc dữ liệu theo điều kiện.
+- OrderBy: sắp xếp dữ liệu tăng dần.
+- Skip: bỏ qua một số dòng dữ liệu.
+- Take: lấy số dòng dữ liệu cần dùng.
+- ToListAsync: execute query và trả kết quả dạng list.
 
 ## Checklist Day 2
 

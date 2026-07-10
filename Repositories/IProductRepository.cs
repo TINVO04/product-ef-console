@@ -13,4 +13,7 @@ public interface IProductRepository
     Task UpdateAsync(Product product);
 
     Task DeleteAsync(int id);
+
+    Task<List<Product>> GetPagedProductsAsync(string? search, int page, int pageSize, string? sortBy);
+
 }
