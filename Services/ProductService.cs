@@ -68,4 +68,10 @@ public class ProductService
         return await _productRepository.GetPagedProductsAsync(search, page, pageSize, sortBy);
     }
 
+    public async Task<List<Product>> GetProductsWithCategoryAsync()
+    {
+        return await _productRepository.GetProductsWithCategoryAsync();
+    }
+
+
 }

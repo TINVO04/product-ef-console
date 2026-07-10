@@ -358,6 +358,129 @@ Take = 5
 - [x] `dotnet build` pass.
 - [x] `dotnet run` hiển thị đúng kết quả test.
 
+## Nội dung đã làm Day 4
+
+- Tạo entity `Category`.
+- Thiết kế quan hệ một-nhiều: một Category có nhiều Product.
+- Thêm `CategoryId` và navigation property `Category` vào Product.
+- Cấu hình quan hệ bằng `OnModelCreating`.
+- Tạo và apply migration `AddCategoryProductRelationship`.
+- Dùng `Include` để query Product kèm Category.
+- In `CategoryName` trong kết quả console.
+- Tạo Category Repository và Service.
+- Dùng `AnyAsync` để chặn xóa Category nếu vẫn còn Product.
+
+## Sơ đồ quan hệ Category - Product
+
+```text
+Categories                         Products
++----------------+                +----------------+
+| Id (PK)        |<---------------| CategoryId (FK)|
+| Name           |      1 - N     | Id (PK)        |
++----------------+                | Name           |
+                                  | Price          |
+                                  | Quantity       |
+                                  | CreatedAt      |
+                                  +----------------+
+```
+
+Ý nghĩa:
+
+- Một Category có thể chứa nhiều Product.
+- Một Product có thể thuộc một Category.
+- `Products.CategoryId` là foreign key trỏ tới `Categories.Id`.
+- `CategoryId` cho phép null để dữ liệu Product cũ vẫn hợp lệ sau khi chạy migration.
+
+## Sơ đồ luồng query bằng Include
+
+```text
+Program.cs
+    |
+    v
+ProductService.GetProductsWithCategoryAsync
+    |
+    v
+ProductRepository.GetProductsWithCategoryAsync
+    |
+    | Include(product => product.Category)
+    v
+AppDbContext
+    |
+    v
+PostgreSQL: Products + Categories
+```
+
+`Include` giúp EF Core lấy Product cùng navigation property Category trong một query. Nhờ đó chương trình có thể đọc `product.Category.Name`.
+
+## Sơ đồ luồng chặn xóa Category
+
+```text
+Program.cs
+    |
+    v
+CategoryService.DeleteCategoryAsync(categoryId)
+    |
+    +--> Không tìm thấy Category --> NotFound
+    |
+    +--> CategoryRepository.HasProductsAsync
+            |
+            +--> Có Product --> HasProducts, không xóa
+            |
+            +--> Không có Product --> DeleteAsync --> Success
+```
+
+## Test case Day 4
+
+### Test case 1: Query Product kèm Category
+
+Dữ liệu:
+
+```text
+Category: Accessory
+Product: Mechanical Keyboard
+CategoryId: Id của Accessory
+```
+
+Kết quả mong đợi:
+
+```text
+Name: Mechanical Keyboard, Category: Accessory, Price: 1200000, Quantity: 3
+```
+
+### Test case 2: Product cũ chưa có Category
+
+Vì `CategoryId` cho phép null, Product cũ không có Category vẫn được query.
+
+Kết quả hiển thị:
+
+```text
+Category: No category
+```
+
+### Test case 3: Chặn xóa Category còn Product
+
+Thực hiện xóa Category `Accessory` khi vẫn còn Product `Mechanical Keyboard`.
+
+Kết quả mong đợi và đã chạy thành công:
+
+```text
+=== Day 4 Delete Category Validation Test ===
+Cannot delete category because it still has products.
+```
+
+## Checklist Day 4
+
+- [x] Có entity `Category`.
+- [x] Product có `CategoryId` và navigation property `Category`.
+- [x] Category có collection navigation `Products`.
+- [x] Có `DbSet<Category>` trong AppDbContext.
+- [x] Có cấu hình quan hệ một-nhiều.
+- [x] Migration quan hệ đã được tạo và apply.
+- [x] Query Product kèm Category bằng `Include` chạy được.
+- [x] In được CategoryName.
+- [x] Chặn xóa Category nếu còn Product bằng `AnyAsync`.
+- [x] `dotnet build` và `dotnet run` thành công.
+
 ## Thuật ngữ đã học
 
 - Entity: class đại diện cho table trong database.
@@ -376,6 +499,11 @@ Take = 5
 - Skip: bỏ qua một số dòng dữ liệu.
 - Take: lấy số dòng dữ liệu cần dùng.
 - ToListAsync: execute query và trả kết quả dạng list.
+- One-to-many: quan hệ một bản ghi cha có nhiều bản ghi con.
+- Foreign key: cột liên kết tới primary key của bảng khác.
+- Navigation property: property dùng để truy cập entity có quan hệ.
+- Include: tải thêm dữ liệu của navigation property khi query.
+- AnyAsync: kiểm tra có dữ liệu thỏa điều kiện mà không cần tải toàn bộ danh sách.
 
 ## Checklist Day 2
 
