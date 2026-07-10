@@ -35,7 +35,7 @@ public class ConsoleApp
                     await RunProductMenuAsync();
                     break;
                 case "3":
-                    Console.WriteLine("Product search is coming next.");
+                    await SearchProductsAsync();
                     break;
                 case "0":
                     isRunning = false;
@@ -489,6 +489,71 @@ public class ConsoleApp
         }
 
         return categoryId;
+    }
+
+    private async Task SearchProductsAsync()
+    {
+        Console.Clear();
+        Console.WriteLine("=== Product Search ===");
+
+        Console.Write("Search text (leave blank for all products): ");
+        var search = Console.ReadLine()?.Trim();
+
+        Console.Write("Page: ");
+        var pageInput = Console.ReadLine()?.Trim();
+        var page = 1;
+
+        if (!string.IsNullOrWhiteSpace(pageInput) &&
+            (!int.TryParse(pageInput, out page) || page < 1))
+        {
+            Console.WriteLine("Page must be a positive number.");
+            return;
+        }
+
+        Console.Write("Page size: ");
+        var pageSizeInput = Console.ReadLine()?.Trim();
+        var pageSize = 5;
+
+        if (!string.IsNullOrWhiteSpace(pageSizeInput) &&
+            (!int.TryParse(pageSizeInput, out pageSize) || pageSize < 1))
+        {
+            Console.WriteLine("Page size must be a positive number.");
+            return;
+        }
+
+        Console.Write("Sort by (id/name/price): ");
+        var sortBy = Console.ReadLine()?.Trim().ToLowerInvariant();
+
+        if (!string.IsNullOrWhiteSpace(sortBy) &&
+            sortBy is not "id" and not "name" and not "price")
+        {
+            Console.WriteLine("Sort field must be id, name, or price.");
+            return;
+        }
+
+        var products = await _productService.GetPagedProductsAsync(
+            search,
+            page,
+            pageSize,
+            sortBy);
+
+        Console.WriteLine("\n=== Search Results ===");
+        Console.WriteLine(
+            $"Search: {search ?? "All"}, Page: {page}, " +
+            $"Page size: {pageSize}, Sort by: {sortBy ?? "id"}");
+
+        if (products.Count == 0)
+        {
+            Console.WriteLine("No products found.");
+            return;
+        }
+
+        foreach (var product in products)
+        {
+            Console.WriteLine(
+                $"Id: {product.Id}, Name: {product.Name}, " +
+                $"Price: {product.Price}, Quantity: {product.Quantity}");
+        }
     }
 
     private static void PrintProductMenu()
