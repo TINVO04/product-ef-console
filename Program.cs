@@ -81,9 +81,21 @@ var day3Products = new List<Product>
     new Product { Name = "USB Cable", Price = 80000, Quantity = 30 }
 };
 
+var existingProducts =
+    await productService.GetAllProductsAsync();
+
 foreach (var product in day3Products)
 {
-    await productService.AddProductAsync(product);
+    var productExists = existingProducts.Any(
+        existingProduct =>
+            existingProduct.Name.Equals(
+                product.Name,
+                StringComparison.OrdinalIgnoreCase));
+
+    if (!productExists)
+    {
+        await productService.AddProductAsync(product);
+    }
 }
 
 var pagedProducts = await productService.GetPagedProductsAsync(
@@ -114,23 +126,42 @@ foreach (var product in sortedByNameProducts)
 
 Console.WriteLine("\n=== Day 4 Category / Product Include Test ===");
 
-var accessoryCategory = new Category
+var categories = await categoryService.GetAllCategoriesAsync();
+
+var accessoryCategory = categories.FirstOrDefault(
+    category => category.Name.Equals(
+        "Accessory",
+        StringComparison.OrdinalIgnoreCase));
+
+if (accessoryCategory is null)
 {
-    Name = "Accessory"
-};
+    accessoryCategory = new Category
+    {
+        Name = "Accessory"
+    };
 
-context.Categories.Add(accessoryCategory);
-await context.SaveChangesAsync();
+    await categoryService.AddCategoryAsync(accessoryCategory);
+}
 
-var day4Product = new Product
+var mechanicalKeyboardExists = existingProducts.Any(
+    product =>
+        product.Name.Equals(
+            "Mechanical Keyboard",
+            StringComparison.OrdinalIgnoreCase) &&
+        product.CategoryId == accessoryCategory.Id);
+
+if (!mechanicalKeyboardExists)
 {
-    Name = "Mechanical Keyboard",
-    Price = 1200000,
-    Quantity = 3,
-    CategoryId = accessoryCategory.Id
-};
+    var day4Product = new Product
+    {
+        Name = "Mechanical Keyboard",
+        Price = 1200000,
+        Quantity = 3,
+        CategoryId = accessoryCategory.Id
+    };
 
-await productService.AddProductAsync(day4Product);
+    await productService.AddProductAsync(day4Product);
+}
 
 var productsWithCategory = await productService.GetProductsWithCategoryAsync();
 
