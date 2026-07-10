@@ -89,3 +89,65 @@ dotnet tool run dotnet-ef database update
 - Học CRUD với EF Core.
 - Viết các thao tác Add, GetAll, GetById, Update, Delete.
 - Tách Repository và Service theo roadmap.
+
+---
+
+# Daily Report - Week 4 Day 2
+
+## Hôm nay đã làm
+
+- Tạo `IProductRepository` để định nghĩa các thao tác CRUD cho `Product`.
+- Tạo `ProductRepository` để thao tác database bằng EF Core.
+- Viết đủ các method: `AddAsync`, `GetAllAsync`, `GetByIdAsync`, `UpdateAsync`, `DeleteAsync`.
+- Tạo `ProductService` để service gọi repository, không gọi `DbContext` trực tiếp trong `Program.cs`.
+- Cập nhật `Program.cs` để test CRUD flow với PostgreSQL database thật.
+- Xử lý trường hợp update/delete không tìm thấy product bằng kết quả `bool` và message rõ ràng.
+
+## File/class chính
+
+- `Repositories/IProductRepository.cs`: interface định nghĩa CRUD contract.
+- `Repositories/ProductRepository.cs`: implement CRUD bằng EF Core.
+- `Services/ProductService.cs`: service gọi repository và xử lý logic đơn giản.
+- `Program.cs`: chạy thử flow Add, GetAll, GetById, Update, Delete.
+
+## Kiến thức đã học
+
+- `AddAsync`: thêm entity vào DbSet.
+- `FindAsync`: tìm entity theo primary key.
+- `ToListAsync`: lấy danh sách dữ liệu từ database.
+- `SaveChangesAsync`: lưu thay đổi thật xuống database.
+- `Remove`: xóa entity khỏi DbSet.
+- Repository Pattern: tách logic truy cập database ra khỏi code chạy chương trình.
+- Service Layer: tách logic nghiệp vụ, giúp `Program.cs` gọn hơn.
+- Null handling: xử lý trường hợp không tìm thấy product.
+
+## Lệnh quan trọng đã dùng
+
+```powershell
+dotnet build
+dotnet run
+```
+
+## Kết quả cuối ngày
+
+- CRUD Product chạy được với PostgreSQL database.
+- Có Repository và Service theo đúng roadmap.
+- `Program.cs` gọi Service để test CRUD flow.
+- Project build thành công.
+- Code đã được commit theo từng bước nhỏ.
+
+## Phần cần nắm để vấn đáp
+
+- Repository Pattern là gì.
+- Vì sao cần `IProductRepository`.
+- `ProductRepository` khác `ProductService` như thế nào.
+- Vì sao cần gọi `SaveChangesAsync`.
+- `AddAsync`, `FindAsync`, `ToListAsync`, `Remove` dùng để làm gì.
+- Vì sao update/delete nên xử lý trường hợp không tìm thấy dữ liệu.
+
+## Việc tiếp theo Day 3
+
+- Học LINQ với EF Core.
+- Viết search/filter sản phẩm.
+- Viết pagination.
+- Viết sort theo giá hoặc tên.
