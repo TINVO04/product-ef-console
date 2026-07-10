@@ -1,15 +1,15 @@
 # ProductEfConsole
 
-Console App học Entity Framework Core với PostgreSQL theo roadmap Week 4 - Day 1.
+Console App học Entity Framework Core với PostgreSQL theo roadmap Week 4.
 
-## Mục tiêu Day 1
+## Mục tiêu
 
-- Tạo project .NET Console.
-- Cấu hình EF Core với PostgreSQL.
-- Tạo entity `Product`.
-- Tạo `AppDbContext` và `DbSet<Product>`.
-- Tạo migration `InitialCreate`.
-- Apply migration để tạo database table thật.
+Project dùng để thực hành:
+
+- EF Core với PostgreSQL.
+- DbContext, DbSet, Entity và Migration.
+- CRUD database bằng Repository Pattern và Service Layer.
+- Cấu hình connection string an toàn bằng User Secrets.
 
 ## Công nghệ sử dụng
 
@@ -29,6 +29,11 @@ ProductEfConsole
 │   └── AppDbContext.cs
 ├── Models/
 │   └── Product.cs
+├── Repositories/
+│   ├── IProductRepository.cs
+│   └── ProductRepository.cs
+├── Services/
+│   └── ProductService.cs
 ├── Migrations/
 │   └── InitialCreate
 ├── appsettings.json
@@ -128,6 +133,68 @@ __EFMigrationsHistory
 - Cấu hình connection string bằng `appsettings.json` và User Secrets.
 - Tạo và apply migration `InitialCreate`.
 
+## Nội dung đã làm Day 2
+
+- Tạo `IProductRepository` để định nghĩa CRUD contract cho Product.
+- Tạo `ProductRepository` để thao tác database bằng EF Core.
+- Viết đủ các thao tác CRUD:
+  - `AddAsync`
+  - `GetAllAsync`
+  - `GetByIdAsync`
+  - `UpdateAsync`
+  - `DeleteAsync`
+- Tạo `ProductService` để service gọi repository.
+- Cập nhật `Program.cs` để test CRUD flow với database thật.
+- Xử lý trường hợp không tìm thấy sản phẩm khi update/delete bằng kết quả `bool` và message rõ ràng.
+
+## Repository Pattern
+
+Repository Pattern giúp tách logic truy cập database ra khỏi `Program.cs`.
+
+Flow hiện tại:
+
+```text
+Program.cs -> ProductService -> IProductRepository/ProductRepository -> AppDbContext -> PostgreSQL
+```
+
+Vai trò từng phần:
+
+- `Program.cs`: chạy thử flow CRUD.
+- `ProductService`: xử lý logic nghiệp vụ đơn giản.
+- `IProductRepository`: interface định nghĩa các thao tác CRUD.
+- `ProductRepository`: implement CRUD bằng EF Core.
+- `AppDbContext`: cấu hình EF Core và kết nối PostgreSQL.
+
+## CRUD flow đã test
+
+Khi chạy:
+
+```powershell
+dotnet run
+```
+
+Chương trình test các bước:
+
+1. Add product mẫu `Keyboard`.
+2. Lấy danh sách sản phẩm.
+3. Tìm sản phẩm theo `Id`.
+4. Update `Price` và `Quantity`.
+5. Delete sản phẩm.
+6. Lấy lại danh sách sau khi delete.
+
+Kết quả mong đợi:
+
+```text
+=== Product EF Console - Day 2 CRUD Test ===
+Added product: Keyboard
+Product list:
+Found product by id ...
+Updated product successfully.
+Deleted product successfully.
+Product list after delete:
+Done.
+```
+
 ## Thuật ngữ đã học
 
 - Entity: class đại diện cho table trong database.
@@ -136,3 +203,20 @@ __EFMigrationsHistory
 - Migration: lịch sử thay đổi schema database.
 - User Secrets: nơi lưu secret local, không commit lên GitHub.
 - CI: quy trình tự động build/check code trên GitHub.
+- Repository Pattern: pattern tách logic truy cập database ra khỏi tầng chạy chương trình.
+- Service Layer: tầng xử lý nghiệp vụ, gọi repository thay vì gọi DbContext trực tiếp.
+- Async/Await: cách viết code bất đồng bộ khi làm việc với database.
+
+## Checklist Day 2
+
+- [x] Có `IProductRepository`.
+- [x] Có `ProductRepository`.
+- [x] Có `ProductService`.
+- [x] Có Add product.
+- [x] Có GetAll products.
+- [x] Có GetById product.
+- [x] Có Update product.
+- [x] Có Delete product.
+- [x] `Program.cs` gọi Service để test CRUD.
+- [x] Project build thành công.
+- [x] CRUD chạy với PostgreSQL database thật.
