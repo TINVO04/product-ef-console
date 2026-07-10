@@ -259,3 +259,111 @@ dotnet run
 - Thêm `CategoryId` cho `Product`.
 - Tạo migration thêm quan hệ.
 - Query danh sách Product kèm CategoryName bằng `Include`.
+
+---
+
+# Daily Report - Week 4 Day 4
+
+## Hôm nay đã làm
+
+- Tạo entity `Category` với `Id`, `Name` và collection `Products`.
+- Thêm `CategoryId` và navigation property `Category` vào `Product`.
+- Thêm `DbSet<Category>` và cấu hình quan hệ một-nhiều trong `AppDbContext`.
+- Tạo và apply migration `AddCategoryProductRelationship`.
+- Thêm method query Product kèm Category bằng `Include`.
+- Test in Product cùng CategoryName trong `Program.cs`.
+- Tạo `ICategoryRepository`, `CategoryRepository` và `CategoryService`.
+- Dùng `AnyAsync` để chặn xóa Category nếu vẫn còn Product.
+
+## File/class chính
+
+- `Models/Category.cs`: entity Category và collection navigation Products.
+- `Models/Product.cs`: thêm foreign key `CategoryId` và navigation property `Category`.
+- `Data/AppDbContext.cs`: thêm Categories và cấu hình relationship.
+- `Migrations/AddCategoryProductRelationship`: tạo bảng, cột và foreign key.
+- `Repositories/ProductRepository.cs`: query Product kèm Category bằng `Include`.
+- `Repositories/CategoryRepository.cs`: kiểm tra Category còn Product và thực hiện xóa.
+- `Services/CategoryService.cs`: xử lý nghiệp vụ chặn xóa Category.
+- `Services/CategoryDeleteResult.cs`: định nghĩa kết quả Success, NotFound, HasProducts.
+- `Program.cs`: test Include và validate xóa Category.
+
+## Kiến thức đã học
+
+- Quan hệ one-to-many giữa Category và Product.
+- Foreign key dùng để liên kết hai bảng.
+- Navigation property dùng để truy cập entity liên quan.
+- `OnModelCreating` dùng để cấu hình relationship bằng Fluent API.
+- `Include` dùng để tải navigation property khi query.
+- `AnyAsync` dùng để kiểm tra dữ liệu tồn tại mà không tải toàn bộ danh sách.
+- Dùng enum để trả kết quả nghiệp vụ rõ hơn boolean.
+
+## Migration đã chạy
+
+```powershell
+dotnet tool run dotnet-ef migrations add AddCategoryProductRelationship
+dotnet tool run dotnet-ef database update
+```
+
+Kết quả schema:
+
+- Có bảng `Categories`.
+- Bảng `Products` có cột `CategoryId`.
+- Có foreign key từ `Products.CategoryId` tới `Categories.Id`.
+- `CategoryId` cho phép null để Product cũ vẫn hợp lệ.
+
+## Test case đã chạy
+
+### Query Product kèm Category
+
+Kết quả:
+
+```text
+Name: Mechanical Keyboard, Category: Accessory, Price: 1200000, Quantity: 3
+```
+
+### Chặn xóa Category còn Product
+
+Kết quả:
+
+```text
+=== Day 4 Delete Category Validation Test ===
+Cannot delete category because it still has products.
+```
+
+Category không bị xóa vì vẫn còn Product liên kết.
+
+## Lệnh quan trọng đã dùng
+
+```powershell
+dotnet build
+dotnet run
+dotnet tool run dotnet-ef migrations add AddCategoryProductRelationship
+dotnet tool run dotnet-ef database update
+```
+
+## Kết quả cuối ngày
+
+- Relationship Category-Product chạy đúng với PostgreSQL.
+- Migration đã apply thành công.
+- Query `Include` lấy được CategoryName.
+- Product cũ không có Category vẫn được xử lý bằng `No category`.
+- Chặn xóa Category nếu còn Product hoạt động đúng.
+- Project build và run thành công.
+
+## Phần cần nắm để vấn đáp
+
+- Quan hệ one-to-many là gì.
+- `CategoryId` và navigation property khác nhau như thế nào.
+- Vì sao `CategoryId` được khai báo nullable.
+- `Include` dùng để làm gì.
+- Nếu không dùng `Include`, navigation property có dữ liệu hay không trong flow hiện tại.
+- Vì sao dùng `AnyAsync` thay vì tải danh sách Product.
+- Flow chặn xóa Category từ Program, Service, Repository tới database.
+
+## Việc tiếp theo Day 5
+
+- Hoàn thiện Product + Category Console App.
+- Bổ sung CRUD Category và Product.
+- Review search, pagination, relationship và Include.
+- Dọn code, naming và tài liệu.
+- Demo luồng migration và chạy app.
