@@ -7,6 +7,7 @@ namespace ProductEfConsole.Data;
 public class AppDbContext : DbContext
 {
     public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -20,4 +21,13 @@ public class AppDbContext : DbContext
 
         optionsBuilder.UseNpgsql(connectionString);
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Category>()
+            .HasMany(category => category.Products)
+            .WithOne(product => product.Category)
+            .HasForeignKey(product => product.CategoryId);
+    }
+
 }
